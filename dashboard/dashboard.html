@@ -5,6 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Dashboard - Data Record</title>
   <link rel="stylesheet" href="dashboard.css">
+  <style>
+    .hidden { display: none; }
+    .seats-grid {
+      display: grid;
+      grid-template-columns: repeat(10, 1fr);
+      gap: 10px;
+    }
+    .seat {
+      border: 1px solid #333;
+      padding: 10px;
+      text-align: center;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+    .vacant { background: #f0f0f0; }
+    .filled { background: #90ee90; }
+  </style>
 </head>
 <body>
   <header class="site-header">
@@ -21,7 +38,7 @@
 
   <nav class="sidebar">
     <button onclick="showSection('orgDetails')">Organisation Details</button>
-    <button onclick="showSection('members')"> + Add Members</button>
+    <button onclick="showSection('members')">Members</button>
     <button onclick="showSection('reports')">Reports</button>
   </nav>
 
@@ -39,19 +56,64 @@
       <ul id="shiftsList"></ul>
     </section>
 
-    <!-- Members Section (future use) -->
-    <section id="members" class="card section hidden">
-      <h2>Members</h2>
-      <p>Coming soon...</p>
-    </section>
+    <!-- Members Section -->
+   <section id="members" class="card section hidden">
+  <h2> Tap on seat number to add new member </h2>
+  <div id="seatContainer" class="seats-grid"></div>
 
-    <!-- Reports Section (future use) -->
-    <section id="reports" class="card section hidden">
-      <h2>Reports</h2>
-      <p>Coming soon...</p>
-    </section>
+  <!-- Add Member Form -->
+  <div id="addMemberForm" class="hidden">
+    <h3>Add Member</h3>
+    <form id="memberForm">
+      <label>Member Name:</label>
+      <input type="text" id="memberName" required />
+
+      <label>Mobile No.:</label>
+      <input type="tel" id="memberMobile" required />
+
+      <label>Aadhaar No.:</label>
+      <input type="text" id="memberAadhaar" required />
+
+      <label>Address:</label>
+      <textarea id="memberAddress" required></textarea>
+
+      <label>Shift:</label>
+      <select id="memberShift">
+        <option value="Full Day">Full Day</option>
+        <option value="Half Day">Half Day</option>
+      </select>
+
+      <label>Joining Date:</label>
+      <input type="date" id="joiningDate" required />
+
+      <label>Exit Date:</label>
+      <input type="date" id="exitDate" />
+
+      <label>Fee Payment Method:</label>
+      <select id="feeMethod">
+        <option value="Cash">Cash</option>
+        <option value="UPI">UPI</option>
+        <option value="Card">Card</option>
+      </select>
+
+      <label>Aadhaar Photo:</label>
+      <input type="file" id="aadhaarPhoto" accept="image/*" />
+
+      <label>Profile Picture:</label>
+      <video id="profileCamera" width="200" height="150" autoplay></video>
+      <button type="button" onclick="captureProfile()">Capture Photo</button>
+      <canvas id="profileCanvas" width="200" height="150" class="hidden"></canvas>
+
+      <div style="margin-top:10px;">
+        <button type="button" onclick="saveMember()">Save</button>
+        <button type="button" onclick="cancelAddMember()">Cancel</button>
+      </div>
+    </form>
+  </div>
+</section>
+
   </main>
 
-  <script src="dashboard.js"></script>
+  <script src="./dashboard.js"></script>
 </body>
 </html>
