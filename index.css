@@ -1,0 +1,100 @@
+body {
+  margin: 0px auto 0px;
+  font-family: Arial, sans-serif;
+  background: #f1ecec;
+  color: #533b3b;
+}
+header {
+  background: linear-gradient(90deg, #1976d2, #2196f3);
+  color: rgb(245, 239, 239);
+  padding: 0px 25px;
+  font-size: 15px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.site-header h1 {
+  margin-bottom: 5px;   /* h1 के नीचे का gap छोटा */
+}
+
+.site-header .tagline {
+  margin-top: 0;        /* tagline के ऊपर का gap हटा */
+  padding: 0px 50px;
+  color: rgb(235, 241, 240);
+}
+
+/* Main container (vertical stack) */
+main {
+  display: flex;
+  flex-direction: column; /* upar niche stack */
+  gap: 20px;              /* Registration aur Login ke beech gap */
+  margin: 50px;           /* Right aur Top se thoda margin */
+  max-width: 400px;       /* Card width control */
+}
+
+/* Common style for section (registration + login) */
+section {
+  background: #fff;
+  padding: 25px 30px;
+  border-radius: 15px;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+  transition: transform 0.2s ease-in-out;
+}
+
+section:hover {
+  transform: translateY(-5px);
+}
+
+h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+/* Inputs */
+input[type="text"],
+input[type="password"] {
+  width: 100%;
+  padding: 12px;
+  margin: 8px 0;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+  transition: border 0.2s;
+}
+
+input:focus {
+  border: 1px solid #2575fc;
+}
+
+/* Buttons */
+button {
+  width: 100%;
+  padding: 12px;
+  margin-top: 10px;
+  background: #2575fc;
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+button:hover {
+  background: #6a11cb;
+}
+
+/* Links */
+a {
+  color: #2575fc;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}

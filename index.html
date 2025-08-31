@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Data Record</title>
+  <link rel="stylesheet" href="index.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <h1>📚 DATA RECORD</h1>
+      <p class="tagline">Easy & Smart Management</p>
+    </div>
+  </header>
+
+  <main>
+    <!-- Login -->
+    <section id="loginSection">
+      <h2>Login</h2>
+      <input type="text" id="loginId" placeholder="Login ID" required>
+      <input type="password" id="loginPass" placeholder="Password" required>
+      <button onclick="login()">Login</button>
+      <p><a href="#" onclick="showRegisterForm()">Click here to Register / Signup</a></p>
+      <p><a href="#" onclick="forgotPassword()">Forgot Password?</a></p>
+    </section>
+
+    <!-- Registration Form (Hidden by Default) -->
+    <section id="registerSection" style="display:none;">
+      <h2>Register Organisation</h2>
+      <input type="text" id="orgName" placeholder="Organisation Name" required>
+      <input type="text" id="adminName" placeholder="Admin Name" required>
+
+      <h3>Address</h3>
+      <select id="nation" onchange="updateCountryCode()">
+        <option value="+91">India</option>
+        <option value="+1">USA</option>
+        <option value="+44">UK</option>
+      </select>
+      <input type="text" id="state" placeholder="State" required>
+      <input type="text" id="district" placeholder="District" required>
+      <input type="text" id="city" placeholder="Village/Town/City" required>
+
+      <h3>Contact</h3>
+      <div style="display:flex;">
+        <input type="text" id="countryCode" style="width:60px;" readonly>
+        <input type="text" id="mobile" placeholder="Mobile Number" required>
+      </div>
+      <button onclick="sendMobileOTP()">Send OTP</button>
+      <input type="text" id="mobileOTP" placeholder="Enter OTP" style="display:none;">
+      <button onclick="verifyMobileOTP()" id="verifyMobileBtn" style="display:none;">Verify Mobile</button>
+
+      <input type="email" id="email" placeholder="Email Address" required>
+      <button onclick="sendEmailOTP()">Send OTP</button>
+      <input type="text" id="emailOTP" placeholder="Enter OTP" style="display:none;">
+      <button onclick="verifyEmailOTP()" id="verifyEmailBtn" style="display:none;">Verify Email</button>
+
+      <h3>Shifts</h3>
+      <select id="shifts" onchange="showShiftInputs()">
+        <option value="1">1 Shift</option>
+        <option value="2">2 Shifts</option>
+        <option value="3">3 Shifts</option>
+      </select>
+      <div id="shiftInputs"></div>
+
+      <h3>Subscription</h3>
+      <select id="subscription">
+        <option value="3">3 Months</option>
+        <option value="6">6 Months</option>
+        <option value="12">Annual</option>
+      </select>
+
+      <button onclick="registerOrganisation()">Register</button>
+      <p><a href="#" onclick="backToLogin()">Back to Login</a></p>
+    </section>
+
+    <!-- Forgot Password -->
+    <section id="forgotPassSection" style="display:none;">
+      <h2>Forgot Password</h2>
+      <button onclick="sendForgotOTP()">Send OTP</button>
+      <input type="text" id="forgotOTP" placeholder="Enter OTP">
+      <button onclick="resetPassword()">Verify OTP</button>
+    </section>
+
+    <!-- New Password -->
+    <section id="newPasswordSection" style="display:none;">
+      <h2>Create New Password</h2>
+      <input type="password" id="newPass" placeholder="New Password">
+      <button onclick="createNewPassword()">Save Password</button>
+    </section>
+  </main>
+
+  <!-- Root JS -->
+  <script src="index.js"></script>
+</body>
+</html>

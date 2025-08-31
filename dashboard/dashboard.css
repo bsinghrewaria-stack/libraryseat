@@ -1,0 +1,94 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f1ecec;
+  color: #333;
+  display: flex;
+}
+
+/* Header */
+header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(90deg, #1976d2, #2196f3);
+  color: #fff;
+  padding: 10px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  z-index: 1000;
+}
+
+header h1 {
+  margin: 0;
+}
+
+header .tagline {
+  margin: 0;
+  font-size: 14px;
+}
+
+.header-right {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+#logoutBtn {
+  background: red;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 5px;
+  color: #fff;
+  cursor: pointer;
+}
+
+/* Sidebar */
+.sidebar {
+  margin-top: 70px; /* header ke niche space */
+  width: 200px;
+  background: #ffffff;
+  height: 100vh;
+  box-shadow: 2px 0 8px rgba(0,0,0,0.2);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  position: fixed;
+}
+
+.sidebar button {
+  padding: 10px;
+  border: none;
+  background: #1976d2;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.sidebar button:hover {
+  background: #1259a7;
+}
+
+/* Main Content */
+main {
+  margin-top: 80px;
+  margin-left: 220px; /* sidebar ke baad */
+  padding: 20px;
+  flex: 1;
+}
+
+.card {
+  background: #fff;
+  padding: 20px;
+  margin-bottom: 15px;
+  border-radius: 10px;
+  box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+}
+
+.hidden {
+  display: none;
+}

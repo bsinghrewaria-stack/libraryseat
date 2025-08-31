@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard - Data Record</title>
+  <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <h1>📚 DATA RECORD</h1>
+      <p class="tagline">Easy & Smart Management</p>
+    </div>
+    <div class="header-right">
+      <span id="orgNameDisplay"></span>
+      <span id="clock"></span>
+      <button id="logoutBtn">Logout</button>
+    </div>
+  </header>
+
+  <nav class="sidebar">
+    <button onclick="showSection('orgDetails')">Organisation Details</button>
+    <button onclick="showSection('members')"> + Add Members</button>
+    <button onclick="showSection('reports')">Reports</button>
+  </nav>
+
+  <main>
+    <!-- Organisation Section -->
+    <section id="orgDetails" class="card section hidden">
+      <h2>Organisation Details</h2>
+      <p><strong>Organisation Name:</strong> <span id="orgName"></span></p>
+      <p><strong>Admin Name:</strong> <span id="adminName"></span></p>
+      <p><strong>Address:</strong> <span id="address"></span></p>
+      <p><strong>Mobile:</strong> <span id="mobile"></span></p>
+      <p><strong>Email:</strong> <span id="email"></span></p>
+      <p><strong>Subscription:</strong> <span id="subscription"></span></p>
+      <h3>Library Shifts</h3>
+      <ul id="shiftsList"></ul>
+    </section>
+
+    <!-- Members Section (future use) -->
+    <section id="members" class="card section hidden">
+      <h2>Members</h2>
+      <p>Coming soon...</p>
+    </section>
+
+    <!-- Reports Section (future use) -->
+    <section id="reports" class="card section hidden">
+      <h2>Reports</h2>
+      <p>Coming soon...</p>
+    </section>
+  </main>
+
+  <script src="dashboard.js"></script>
+</body>
+</html>
