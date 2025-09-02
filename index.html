@@ -18,14 +18,14 @@
     <!-- Login -->
     <section id="loginSection">
       <h2>Login</h2>
-      <input type="text" id="loginId" placeholder="Login ID" required>
+      <input type="text" id="loginId" placeholder="Login Email" required>
       <input type="password" id="loginPass" placeholder="Password" required>
       <button onclick="login()">Login</button>
       <p><a href="#" onclick="showRegisterForm()">Click here to Register / Signup</a></p>
       <p><a href="#" onclick="forgotPassword()">Forgot Password?</a></p>
     </section>
 
-    <!-- Registration Form (Hidden by Default) -->
+    <!-- Registration Form -->
     <section id="registerSection" style="display:none;">
       <h2>Register Organisation</h2>
       <input type="text" id="orgName" placeholder="Organisation Name" required>
@@ -50,10 +50,14 @@
       <input type="text" id="mobileOTP" placeholder="Enter OTP" style="display:none;">
       <button onclick="verifyMobileOTP()" id="verifyMobileBtn" style="display:none;">Verify Mobile</button>
 
+      <h3>Email</h3>
       <input type="email" id="email" placeholder="Email Address" required>
       <button onclick="sendEmailOTP()">Send OTP</button>
       <input type="text" id="emailOTP" placeholder="Enter OTP" style="display:none;">
       <button onclick="verifyEmailOTP()" id="verifyEmailBtn" style="display:none;">Verify Email</button>
+
+      <h3>Login Credentials</h3>
+      <input type="password" id="regPassword" placeholder="Create Password" required>
 
       <h3>Shifts</h3>
       <select id="shifts" onchange="showShiftInputs()">
@@ -92,4 +96,22 @@
 </body>
   <!-- Root JS -->
   <script src="index.js"></script>
+  <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-analytics.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDKEvzA4Ee-7L8r_anNVmTBArDXVtqJyoQ",
+    authDomain: "datarecor001.firebaseapp.com",
+    projectId: "datarecor001",
+    storageBucket: "datarecor001.firebasestorage.app",
+    messagingSenderId: "830187483338",
+    appId: "1:830187483338:web:bbf906436b0d322c5ec433",
+    measurementId: "G-1T1KGTH9NT"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+</script>
+
 </html>

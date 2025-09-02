@@ -78,18 +78,23 @@ function registerOrganisation() {
   let district = document.getElementById("district").value;
   let city = document.getElementById("city").value;
   let countryCode = document.getElementById("countryCode").value;
-  let mobile = document.getElementById("mobile").value;
-  let email = document.getElementById("email").value;
+  let mobile = document.getElementById("mobile").value.trim();
+  let email = document.getElementById("email").value.trim();
+  let regPassword = document.getElementById("regPassword").value.trim();
   let shifts = parseInt(document.getElementById("shifts").value);
   let subscription = document.getElementById("subscription").value;
 
-  if (!localStorage.getItem("mobileVerified") || !localStorage.getItem("emailVerified")) {
-    alert("Please verify Mobile & Email before registering ❌");
+  if (!localStorage.getItem("mobileVerified")) {
+    alert("Please verify Mobile before registering ❌");
+    return;
+  }
+  if (!localStorage.getItem("emailVerified")) {
+    alert("Please verify Email before registering ❌");
     return;
   }
 
-  if (!orgName || !adminName) {
-    alert("Please fill Organisation and Admin Name ❌");
+  if (!orgName || !adminName || !email || !regPassword) {
+    alert("Please fill all required fields ❌");
     return;
   }
 
@@ -101,12 +106,10 @@ function registerOrganisation() {
     shiftData.push({ start, end });
   }
 
-  // generate credentials
-  let prefix = orgName.replace(/\s+/g, "").substring(0, 4).toUpperCase();
-  let userId = prefix + Math.floor(Math.random() * 10000);
-  let userPass = "PASS" + Math.floor(Math.random() * 1000);
+  // email = login id
+  let userId = email;
+  let userPass = regPassword;
 
-  // save all data
   let orgData = {
     orgName,
     adminName,
@@ -117,25 +120,26 @@ function registerOrganisation() {
     subscription,
     userId,
     userPass,
-    isTempPassword: true,
+    isTempPassword: false,
   };
 
-  // get all users
   let users = JSON.parse(localStorage.getItem("users")) || [];
+
+  if (users.some(u => u.userId === userId)) {
+    alert("This Email is already registered ❌");
+    return;
+  }
+
   users.push(orgData);
   localStorage.setItem("users", JSON.stringify(users));
 
-  // clear verification flags (so next org must verify again)
   localStorage.removeItem("mobileVerified");
   localStorage.removeItem("emailVerified");
 
-  // Show registration success with Login ID + Org Name
   document.getElementById("registerSection").innerHTML = `
     <h2>✅ Registration Successful!</h2>
-    <p><strong>Login ID -</strong> ${userId}</p>
-    <p><strong>Organisation Name -</strong> ${orgName}</p>
-    <p><strong>Admin Name -</strong> ${adminName}</p>
-    <p><strong>Password (Temporary) -</strong> ${userPass}</p>
+    <p><strong>Login Email -</strong> ${email}</p>
+    <p><strong>Password -</strong> (Your chosen password)</p>
     <button onclick="backToLogin()">Go to Login</button>
   `;
 }
@@ -149,17 +153,10 @@ function login() {
   let user = users.find(u => u.userId === id && u.userPass === pass);
 
   if (user) {
-    if (user.isTempPassword) {
-      alert("Temporary password detected. Please create a new password before login.");
-      localStorage.setItem("currentUser", user.userId); // only this user active
-      document.getElementById("newPasswordSection").style.display = "block";
-      document.getElementById("loginSection").style.display = "none";
-    } else {
-      localStorage.setItem("currentUser", user.userId); // only this user active
-      window.location.href = "dashboard/dashboard.html";
-    }
+    localStorage.setItem("currentUser", user.userId);
+    window.location.href = "dashboard/dashboard.html";
   } else {
-    alert("Invalid ID or Password ❌");
+    alert("Invalid Email or Password ❌");
   }
 }
 
