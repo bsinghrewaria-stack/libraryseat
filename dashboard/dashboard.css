@@ -22,7 +22,7 @@ header {
   z-index: 1000;
 }
 header h1 { margin: 0; }
-header .tagline { margin: 0; font-size: 14px; }
+header .tagline { margin: 0px 52px; font-size: 18px; }
 .header-right { display: flex; gap: 20px; align-items: center; }
 #logoutBtn {
   background: red;
@@ -109,10 +109,10 @@ main {
 
 /* ================= Add Member Form ================= */
 #addMemberForm {
-  background: #ffffff;
+  background: #eff1f0;
   padding: 20px;
   border-radius: 12px;
-  box-shadow: 0 6px 15px rgba(0,0,0,0.25);
+  box-shadow: 0 6px 15px rgba(231, 235, 232, 0.815);
   margin-top: 20px;
   max-width: 450px;
   transition: transform 0.2s;
@@ -126,7 +126,6 @@ main {
   font-size: 20px;
   font-weight: bold;
 }
-
 #addMemberForm label {
   display: block;
   margin-top: 10px;
@@ -140,7 +139,7 @@ main {
   padding: 6px 10px;
   margin-top: 4px;
   border-radius: 6px;
-  border: 1px solid #ccc;
+  border: 1px solid #dbd5d5;
   box-sizing: border-box;
   transition: border-color 0.2s;
 }
@@ -155,7 +154,6 @@ main {
   border: 2px solid #1976d2;
   border-radius: 8px;
 }
-
 #addMemberForm button {
   margin-top: 12px;
   padding: 8px 14px;
@@ -169,27 +167,120 @@ main {
   transform: scale(1.05);
 }
 #addMemberForm button[type="button"] { background: #1976d2; color: #fff; margin-right: 8px; }
-#modalOverlay {
+
+/* ================= Fee Details Section ================= */
+.fee-buttons {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 15px;
+}
+.fee-buttons button {
+  padding: 8px 14px;
+  border: none;
+  border-radius: 6px;
+  background: #1976d2;
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.fee-buttons button:hover { background: #1259a7; transform: scale(1.05); }
+#feeDisplayContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 10px;
+}
+.fee-seat-card {
+  background: #fff;
+  border-radius: 10px;
+  padding: 10px;
+  width: 120px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+  transition: transform 0.2s;
+  cursor: pointer;
+}
+.fee-seat-card:hover { transform: scale(1.05); }
+.highlight { border: 2px solid #f44336; }
+.paid { background-color: #d9f7d9; }
+.pending { background-color: #ffd9d9; }
+.reminder-btn {
+  margin-top: 6px;
+  padding: 4px 8px;
+  font-size: 12px;
+  border: none;
+  border-radius: 5px;
+  background: #ff9800;
+  color: #fff;
+  cursor: pointer;
+}
+.reminder-btn:hover { background: #e68900; }
+
+/* ================= Modal ================= */
+.modal {
   position: fixed;
-  top:0;
-  left:0;
-  width:100%;
-  height:100%;
-  background: rgba(0,0,0,0.5);
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  backdrop-filter: blur(5px);
   z-index: 1000;
 }
-
-#addMemberModal {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+.modal.hidden { display: none; }
+.modal-content {
   background: #fff;
   padding: 20px;
   border-radius: 12px;
-  box-shadow: 0 6px 15px rgba(0,0,0,0.3);
-  z-index: 1001;
-  max-width: 450px;
-  overflow-y: auto;
+  width: 400px;
   max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  animation: fadeIn 0.3s ease-in-out;
+}
+.modal-content h3 {
+  margin-top: 0;
+  background: linear-gradient(90deg,#1976d2,#2196f3);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-size: 20px;
+  font-weight: bold;
+}
+.modal-content label {
+  display: block;
+  margin-top: 10px;
+  font-weight: bold;
+}
+.modal-content input,
+.modal-content textarea,
+.modal-content select {
+  width: 100%;
+  padding: 6px 10px;
+  margin-top: 4px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+}
+.modal-content button {
+  margin-top: 12px;
+  padding: 8px 14px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.2s;
+}
+.modal-content button:hover {
+  transform: scale(1.05);
+}
+.modal-content button[type="button"] {
+  background: #1976d2;
+  color: #fff;
+  margin-right: 8px;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
 }

@@ -1,7 +1,4 @@
 let generatedOTP = "1234"; // Demo OTP
-let userId = localStorage.getItem("userId") || "";
-let userPass = localStorage.getItem("userPass") || "";
-let isTempPassword = localStorage.getItem("isTempPassword") === "true";
 
 // ========= UI Functions =========
 function showRegisterForm() {
@@ -12,6 +9,8 @@ function showRegisterForm() {
 function backToLogin() {
   document.getElementById("registerSection").style.display = "none";
   document.getElementById("loginSection").style.display = "block";
+  document.getElementById("forgotPassSection").style.display = "none";
+  document.getElementById("newPasswordSection").style.display = "none";
 }
 
 // ========= Country Code =========
@@ -72,8 +71,8 @@ function showShiftInputs() {
 
 // ========= Register Organisation =========
 function registerOrganisation() {
-  let orgName = document.getElementById("orgName").value;
-  let adminName = document.getElementById("adminName").value;
+  let orgName = document.getElementById("orgName").value.trim();
+  let adminName = document.getElementById("adminName").value.trim();
   let nation = document.getElementById("nation").options[document.getElementById("nation").selectedIndex].text;
   let state = document.getElementById("state").value;
   let district = document.getElementById("district").value;
@@ -89,6 +88,11 @@ function registerOrganisation() {
     return;
   }
 
+  if (!orgName || !adminName) {
+    alert("Please fill Organisation and Admin Name ❌");
+    return;
+  }
+
   // collect shift timings
   let shiftData = [];
   for (let i = 1; i <= shifts; i++) {
@@ -98,9 +102,9 @@ function registerOrganisation() {
   }
 
   // generate credentials
-  userId = "ORG" + Math.floor(Math.random() * 1000);
-  userPass = "PASS" + Math.floor(Math.random() * 1000);
-  isTempPassword = true;
+  let prefix = orgName.replace(/\s+/g, "").substring(0, 4).toUpperCase();
+  let userId = prefix + Math.floor(Math.random() * 10000);
+  let userPass = "PASS" + Math.floor(Math.random() * 1000);
 
   // save all data
   let orgData = {
@@ -113,31 +117,46 @@ function registerOrganisation() {
     subscription,
     userId,
     userPass,
+    isTempPassword: true,
   };
 
-  localStorage.setItem("orgData", JSON.stringify(orgData));
-  localStorage.setItem("userId", userId);
-  localStorage.setItem("userPass", userPass);
-  localStorage.setItem("isTempPassword", "true");
+  // get all users
+  let users = JSON.parse(localStorage.getItem("users")) || [];
+  users.push(orgData);
+  localStorage.setItem("users", JSON.stringify(users));
 
-  alert(`✅ Registration Successful!
-Login ID: ${userId}
-Password: ${userPass}`);
+  // clear verification flags (so next org must verify again)
+  localStorage.removeItem("mobileVerified");
+  localStorage.removeItem("emailVerified");
 
-  backToLogin();
+  // Show registration success with Login ID + Org Name
+  document.getElementById("registerSection").innerHTML = `
+    <h2>✅ Registration Successful!</h2>
+    <p><strong>Login ID -</strong> ${userId}</p>
+    <p><strong>Organisation Name -</strong> ${orgName}</p>
+    <p><strong>Admin Name -</strong> ${adminName}</p>
+    <p><strong>Password (Temporary) -</strong> ${userPass}</p>
+    <button onclick="backToLogin()">Go to Login</button>
+  `;
 }
 
 // ========= Login =========
 function login() {
-  let id = document.getElementById("loginId").value;
-  let pass = document.getElementById("loginPass").value;
+  let id = document.getElementById("loginId").value.trim();
+  let pass = document.getElementById("loginPass").value.trim();
 
-  if (id === localStorage.getItem("userId") && pass === localStorage.getItem("userPass")) {
-    if (localStorage.getItem("isTempPassword") === "true") {
+  let users = JSON.parse(localStorage.getItem("users")) || [];
+  let user = users.find(u => u.userId === id && u.userPass === pass);
+
+  if (user) {
+    if (user.isTempPassword) {
       alert("Temporary password detected. Please create a new password before login.");
+      localStorage.setItem("currentUser", user.userId); // only this user active
       document.getElementById("newPasswordSection").style.display = "block";
+      document.getElementById("loginSection").style.display = "none";
     } else {
-      window.location.href = "../dashboard/dashboard.html";
+      localStorage.setItem("currentUser", user.userId); // only this user active
+      window.location.href = "dashboard/dashboard.html";
     }
   } else {
     alert("Invalid ID or Password ❌");
@@ -147,6 +166,7 @@ function login() {
 // ========= Forgot Password =========
 function forgotPassword() {
   document.getElementById("forgotPassSection").style.display = "block";
+  document.getElementById("loginSection").style.display = "none";
 }
 function sendForgotOTP() {
   alert("OTP Sent to Mobile (Use 1234)");
@@ -156,6 +176,7 @@ function resetPassword() {
   if (otp === generatedOTP) {
     alert("OTP Verified. Please create a new password.");
     document.getElementById("newPasswordSection").style.display = "block";
+    document.getElementById("forgotPassSection").style.display = "none";
   } else {
     alert("Invalid OTP ❌");
   }
@@ -168,8 +189,18 @@ function createNewPassword() {
     alert("Password cannot be empty!");
     return;
   }
-  localStorage.setItem("userPass", newPass);
-  localStorage.setItem("isTempPassword", "false");
-  alert("Password Updated Successfully! Now you can login.");
-  document.getElementById("newPasswordSection").style.display = "none";
+
+  let users = JSON.parse(localStorage.getItem("users")) || [];
+  let currentUserId = localStorage.getItem("currentUser");
+
+  let userIndex = users.findIndex(u => u.userId === currentUserId);
+  if (userIndex !== -1) {
+    users[userIndex].userPass = newPass;
+    users[userIndex].isTempPassword = false;
+    localStorage.setItem("users", JSON.stringify(users));
+    alert("Password Updated Successfully! Now you can login.");
+    backToLogin();
+  } else {
+    alert("Error: User not found ❌");
+  }
 }

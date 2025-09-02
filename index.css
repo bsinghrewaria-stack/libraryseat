@@ -8,7 +8,7 @@ header {
   background: linear-gradient(90deg, #1976d2, #2196f3);
   color: rgb(245, 239, 239);
   padding: 0px 25px;
-  font-size: 15px;
+  font-size: 16px;
   font-weight: bold;
   letter-spacing: 1px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.2);
@@ -21,9 +21,10 @@ header {
 }
 
 .site-header .tagline {
-  margin-top: 0;        /* tagline के ऊपर का gap हटा */
-  padding: 0px 50px;
+  margin: 0px 53px;        /* tagline के ऊपर का gap हटा */
+  padding: 0px 10px;
   color: rgb(235, 241, 240);
+  font-size: 15px;
 }
 
 /* Main container (vertical stack) */

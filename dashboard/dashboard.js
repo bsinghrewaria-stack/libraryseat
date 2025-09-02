@@ -1,12 +1,24 @@
 // ================== Load organisation data ==================
 window.onload = function () {
-  let orgData = JSON.parse(localStorage.getItem("orgData"));
+  let users = JSON.parse(localStorage.getItem("users")) || [];
+  let currentUserId = localStorage.getItem("currentUser");
 
-  if (!orgData) {
-    alert("No organisation data found! Please register first.");
+  if (!currentUserId) {
+    alert("Please login first!");
     window.location.href = "index.html";
     return;
   }
+
+  let orgData = users.find(u => u.userId === currentUserId);
+
+  if (!orgData) {
+    alert("Organisation not found!");
+    window.location.href = "index.html";
+    return;
+  }
+
+  // Current Org ID (unique identifier - userId based)
+  window.currentOrgId = orgData.userId;
 
   // Header Org Name
   document.getElementById("orgNameDisplay").textContent = orgData.orgName;
@@ -23,7 +35,7 @@ window.onload = function () {
   // Shifts
   let shiftList = document.getElementById("shiftsList");
   shiftList.innerHTML = "";
-  orgData.shifts.forEach((s, i) => {
+  (orgData.shifts || []).forEach((s, i) => {
     let li = document.createElement("li");
     li.textContent = `Shift ${i + 1}: ${s.start} to ${s.end}`;
     shiftList.appendChild(li);
@@ -35,6 +47,7 @@ window.onload = function () {
 
 // ================== Logout ==================
 document.getElementById("logoutBtn").addEventListener("click", () => {
+  localStorage.removeItem("currentUser");
   window.location.href = "../index.html";
 });
 
@@ -51,12 +64,20 @@ updateClock();
 
 let currentSeat = null;
 let profileDataURL = null; // Captured profile picture
+let editingSeatNo = null; // for editing modal
+let editMode = false; // member modal state
+
+// ================== Helper: Get Seats Key ==================
+function getSeatsKey() {
+  return `seatsData_${window.currentOrgId}`;
+}
 
 // ================== Seats Rendering ==================
 function renderSeats() {
   const seatContainer = document.getElementById("seatContainer");
+  if (!seatContainer) return;
   seatContainer.innerHTML = "";
-  let seatsData = JSON.parse(localStorage.getItem("seatsData")) || {};
+  let seatsData = JSON.parse(localStorage.getItem(getSeatsKey())) || {};
 
   for (let i = 1; i <= 50; i++) {
     let seatDiv = document.createElement("div");
@@ -65,7 +86,7 @@ function renderSeats() {
     if (seatsData[i]) {
       seatDiv.classList.add("filled");
       seatDiv.innerHTML = `<strong>${i}</strong><br>${seatsData[i].name}<br>${seatsData[i].shift}`;
-      seatDiv.onclick = () => showMemberDetails(i, seatsData[i]);
+      seatDiv.onclick = () => openMemberModal(i);
     } else {
       seatDiv.classList.add("vacant");
       seatDiv.innerHTML = `<strong>${i}</strong><br><em>Vacant</em>`;
@@ -76,13 +97,13 @@ function renderSeats() {
   }
 }
 
-// ================== Open Form ==================
+// ================== Open Add Member Form (Modal + Blur) ==================
 function openAddMemberForm(seatNo) {
   currentSeat = seatNo;
-  document.getElementById("addMemberForm").classList.remove("hidden");
   profileDataURL = null;
 
-  // Start camera
+  document.getElementById("memberForm").reset();
+
   const video = document.getElementById("profileCamera");
   if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
     navigator.mediaDevices.getUserMedia({ video: true })
@@ -90,7 +111,8 @@ function openAddMemberForm(seatNo) {
       .catch(err => console.log("Camera error:", err));
   }
 
-  document.getElementById("memberForm").reset();
+  document.getElementById("addMemberModal").classList.remove("hidden");
+  document.body.classList.add("modal-open");
 }
 
 // ================== Capture Profile ==================
@@ -112,76 +134,272 @@ function saveMember() {
   const shift = document.getElementById("memberShift").value;
   const joining = document.getElementById("joiningDate").value;
   const exit = document.getElementById("exitDate").value;
-  const fee = document.getElementById("feeMethod").value;
+  const feeAmount = document.getElementById("feeAmount").value.trim();
+  const feeMethod = document.getElementById("feeMethod").value;
+
+  if (!feeAmount) {
+    alert("Please enter Total Fee (₹)");
+    return;
+  }
 
   const aadhaarPhotoFile = document.getElementById("aadhaarPhoto").files[0];
-  let reader = new FileReader();
-  reader.onload = function() {
-    const aadhaarPhotoData = reader.result;
+  let seatsData = JSON.parse(localStorage.getItem(getSeatsKey())) || {};
 
-    let seatsData = JSON.parse(localStorage.getItem("seatsData")) || {};
+  function saveData(aadhaarPhotoData) {
     seatsData[currentSeat] = {
       name, mobile, aadhaar, address, shift,
-      joining, exit, fee,
+      joining, exit,
+      feeAmount: Number(feeAmount),
+      feeMethod,
+      feePaid: true,
       aadhaarPhoto: aadhaarPhotoData,
       profilePhoto: profileDataURL
     };
-    localStorage.setItem("seatsData", JSON.stringify(seatsData));
+    localStorage.setItem(getSeatsKey(), JSON.stringify(seatsData));
 
-    document.getElementById("addMemberForm").classList.add("hidden");
+    closeAddMemberModal();
     renderSeats();
-  };
+  }
 
-  if(aadhaarPhotoFile){
+  if (aadhaarPhotoFile) {
+    let reader = new FileReader();
+    reader.onload = function () {
+      saveData(reader.result);
+    };
     reader.readAsDataURL(aadhaarPhotoFile);
   } else {
-    // No Aadhaar photo selected
-    let seatsData = JSON.parse(localStorage.getItem("seatsData")) || {};
-    seatsData[currentSeat] = {
-      name, mobile, aadhaar, address, shift,
-      joining, exit, fee,
-      aadhaarPhoto: null,
-      profilePhoto: profileDataURL
-    };
-    localStorage.setItem("seatsData", JSON.stringify(seatsData));
-    document.getElementById("addMemberForm").classList.add("hidden");
-    renderSeats();
+    saveData(null);
   }
 }
 
-// ================== Cancel Form ==================
-function cancelAddMember() {
-  document.getElementById("memberForm").reset();
-  document.getElementById("addMemberForm").classList.add("hidden");
+// ================== Cancel / Close Add Member Modal ==================
+function closeAddMemberModal() {
+  document.getElementById("addMemberModal").classList.add("hidden");
+  document.body.classList.remove("modal-open");
   profileDataURL = null;
+
   const video = document.getElementById("profileCamera");
-  if (video.srcObject) {
+  if (video && video.srcObject) {
     video.srcObject.getTracks().forEach(track => track.stop());
+    video.srcObject = null;
   }
 }
 
-// ================== Show Member Details ==================
-function showMemberDetails(seatNo, member) {
-  let info = `
-Seat No: ${seatNo}
-Name: ${member.name}
-Mobile: ${member.mobile}
-Aadhaar: ${member.aadhaar}
-Address: ${member.address}
-Shift: ${member.shift}
-Joining: ${member.joining}
-Exit: ${member.exit}
-Fee: ${member.fee}
-  `;
-  alert(info);
+// ================== Member Modal (View-first, then Edit) ==================
+function openMemberModal(seatNo) {
+  const seatsData = JSON.parse(localStorage.getItem(getSeatsKey())) || {};
+  const member = seatsData[seatNo];
+  if (!member) return;
+
+  editingSeatNo = seatNo;
+  editMode = false;
+
+  populateMemberView(member, seatNo);
+  fillEditForm(member);
+
+  document.getElementById("memberDetailsView").classList.remove("hidden");
+  document.getElementById("editMemberForm").classList.add("hidden");
+
+  document.getElementById("memberDetailsModal").classList.remove("hidden");
+  document.body.classList.add("modal-open");
 }
 
-// ================== Section Switching ==================
+function populateMemberView(member, seatNo) {
+  const fmt = (d) => d ? new Date(d).toLocaleDateString() : "N/A";
+  document.getElementById("viewSeatNo").textContent = seatNo;
+  document.getElementById("viewName").textContent = member.name || "N/A";
+  document.getElementById("viewMobile").textContent = member.mobile || "N/A";
+  document.getElementById("viewAadhaar").textContent = member.aadhaar || "N/A";
+  document.getElementById("viewAddress").textContent = member.address || "N/A";
+  document.getElementById("viewShift").textContent = member.shift || "N/A";
+  document.getElementById("viewJoining").textContent = fmt(member.joining);
+  document.getElementById("viewExit").textContent = fmt(member.exit);
+  document.getElementById("viewFee").textContent = member.feeAmount ?? "N/A";
+  document.getElementById("viewMethod").textContent = member.feeMethod || "N/A";
+  document.getElementById("viewStatus").textContent = member.feePaid ? "Paid" : "Pending";
+
+  const profileImg = document.getElementById("viewProfileImg");
+  profileImg.src = member.profilePhoto || "";
+  profileImg.style.display = member.profilePhoto ? "block" : "none";
+
+  const aadhaarImg = document.getElementById("viewAadhaarImg");
+  aadhaarImg.src = member.aadhaarPhoto || "";
+  aadhaarImg.style.display = member.aadhaarPhoto ? "block" : "none";
+}
+
+function fillEditForm(member) {
+  document.getElementById("editMemberName").value = member.name || "";
+  document.getElementById("editMemberMobile").value = member.mobile || "";
+  document.getElementById("editMemberAadhaar").value = member.aadhaar || "";
+  document.getElementById("editMemberAddress").value = member.address || "";
+  document.getElementById("editMemberShift").value = member.shift || "Full Day";
+  document.getElementById("editJoiningDate").value = member.joining || "";
+  document.getElementById("editExitDate").value = member.exit || "";
+  document.getElementById("editFeeAmount").value = member.feeAmount || 0;
+  document.getElementById("editFeeMethod").value = member.feeMethod || "Cash";
+}
+
+// Switch to edit mode
+function enableEditMode() {
+  if (!editingSeatNo) return;
+  editMode = true;
+  document.getElementById("memberDetailsView").classList.add("hidden");
+  document.getElementById("editMemberForm").classList.remove("hidden");
+}
+
+// Cancel editing → back to view
+function cancelEdit() {
+  editMode = false;
+  const seatsData = JSON.parse(localStorage.getItem(getSeatsKey())) || {};
+  const member = seatsData[editingSeatNo];
+  populateMemberView(member, editingSeatNo);
+  document.getElementById("editMemberForm").classList.add("hidden");
+  document.getElementById("memberDetailsView").classList.remove("hidden");
+}
+
+function closeMemberModal() {
+  document.getElementById("memberDetailsModal").classList.add("hidden");
+  document.body.classList.remove("modal-open");
+  editingSeatNo = null;
+  editMode = false;
+}
+
+// Update and remain in modal (show view again)
+function updateMember() {
+  if (!editingSeatNo) return;
+  const seatsData = JSON.parse(localStorage.getItem(getSeatsKey())) || {};
+  const member = seatsData[editingSeatNo];
+  if (!member) return;
+
+  member.name = document.getElementById("editMemberName").value.trim();
+  member.mobile = document.getElementById("editMemberMobile").value.trim();
+  member.aadhaar = document.getElementById("editMemberAadhaar").value.trim();
+  member.address = document.getElementById("editMemberAddress").value.trim();
+  member.shift = document.getElementById("editMemberShift").value;
+  member.joining = document.getElementById("editJoiningDate").value;
+  member.exit = document.getElementById("editExitDate").value;
+  member.feeAmount = Number(document.getElementById("editFeeAmount").value);
+  member.feeMethod = document.getElementById("editFeeMethod").value;
+
+  seatsData[editingSeatNo] = member;
+  localStorage.setItem(getSeatsKey(), JSON.stringify(seatsData));
+
+  renderSeats();
+  if (document.getElementById("feeDetails") && !document.getElementById("feeDetails").classList.contains("hidden")) {
+    showFeeClassification(currentFeeClassification);
+  }
+
+  populateMemberView(member, editingSeatNo);
+  document.getElementById("editMemberForm").classList.add("hidden");
+  document.getElementById("memberDetailsView").classList.remove("hidden");
+  editMode = false;
+}
+
+// ================== Section Switching & Fee Details ==================
+let currentFeeClassification = 'status';
+
 function showSection(id) {
   const sections = document.querySelectorAll("main .section");
   sections.forEach(sec => sec.classList.add("hidden"));
   const sec = document.getElementById(id);
   if (sec) sec.classList.remove("hidden");
+
+  if (id === "feeDetails") {
+    showFeeClassification(currentFeeClassification);
+  }
+}
+
+// ================== Fee Details Logic with Auto Fee Reset ==================
+function showFeeClassification(type) {
+  currentFeeClassification = type;
+  const container = document.getElementById('feeDisplayContainer');
+  if (!container) return;
+  container.innerHTML = '';
+  const seatsData = JSON.parse(localStorage.getItem(getSeatsKey())) || {};
+  const today = new Date();
+
+  function formatDate(dateStr) {
+    if (!dateStr) return 'N/A';
+    const d = new Date(dateStr);
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    return `${day}-${month}-${year}`;
+  }
+
+  function addMonths(date, months) {
+    let d = new Date(date);
+    d.setMonth(d.getMonth() + months);
+    return d;
+  }
+
+  Object.entries(seatsData).forEach(([seatNo, member]) => {
+    let show = false;
+    let highlight = false;
+
+    if (!member.joining) return;
+    const joinDate = new Date(member.joining);
+    let nextFeeDate = addMonths(joinDate, 1);
+
+    if (member.feePaid && today >= nextFeeDate) {
+      member.feePaid = false; 
+      seatsData[seatNo] = member;
+      localStorage.setItem(getSeatsKey(), JSON.stringify(seatsData));
+    }
+
+    if (type === 'status') show = true;
+    if (type === 'tomorrow') {
+      const diff = Math.ceil((nextFeeDate - today) / (1000 * 60 * 60 * 24));
+      if (diff === 1) { show = true; highlight = true; }
+    }
+    if (type === '5days') {
+      const diff = Math.ceil((nextFeeDate - today) / (1000 * 60 * 60 * 24));
+      if (diff > 0 && diff <= 5) show = true;
+    }
+    if (type === 'remainder' && !member.feePaid) show = true;
+
+    if (show) {
+      const div = document.createElement('div');
+      div.classList.add('fee-seat-card');
+      if (highlight) div.classList.add('highlight');
+      div.classList.add(member.feePaid ? 'paid' : 'pending');
+
+      div.innerHTML = `<strong>Seat ${seatNo}</strong><br>
+        ${member.name}<br>
+        Fee: ₹${member.feeAmount || "N/A"} (${member.feeMethod || "N/A"})<br>
+        Status: ${member.feePaid ? 'Paid' : 'Pending'}<br>
+        Joining: ${formatDate(member.joining)}<br>
+        Next Fee Due: ${formatDate(nextFeeDate)}`;
+
+      if (type === 'remainder' || highlight) {
+        const btn = document.createElement('button');
+        btn.textContent = 'Send Reminder';
+        btn.classList.add('reminder-btn');
+        btn.onclick = () => sendReminder('individual', seatNo);
+        div.appendChild(btn);
+      }
+
+      container.appendChild(div);
+    }
+  });
+}
+
+// ================== Send Reminder ==================
+function sendReminder(type, seatNo = null) {
+  const seatsData = JSON.parse(localStorage.getItem(getSeatsKey())) || {};
+
+  if (type === 'all') {
+    Object.entries(seatsData).forEach(([seat, member]) => {
+      if (!member.feePaid) {
+        alert(`Reminder Sent to ${member.name} (Seat ${seat})\nFee Pending: ₹${member.feeAmount || "N/A"}`);
+      }
+    });
+  } else if (type === 'individual' && seatNo) {
+    const member = seatsData[seatNo];
+    if (member) {
+      alert(`Reminder Sent to ${member.name} (Seat ${seatNo})\nFee Pending: ₹${member.feeAmount || "N/A"}`);
+    }
+  }
 }
 
 // ================== Init ==================

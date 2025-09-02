@@ -5,23 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Dashboard - Data Record</title>
   <link rel="stylesheet" href="dashboard.css">
-  <style>
-    .hidden { display: none; }
-    .seats-grid {
-      display: grid;
-      grid-template-columns: repeat(10, 1fr);
-      gap: 10px;
-    }
-    .seat {
-      border: 1px solid #333;
-      padding: 10px;
-      text-align: center;
-      cursor: pointer;
-      border-radius: 5px;
-    }
-    .vacant { background: #f0f0f0; }
-    .filled { background: #90ee90; }
-  </style>
 </head>
 <body>
   <header class="site-header">
@@ -38,7 +21,9 @@
 
   <nav class="sidebar">
     <button onclick="showSection('orgDetails')">Organisation Details</button>
+    <button onclick="showSection('Notifications')">Add Notifications /Information</button>
     <button onclick="showSection('members')">Members</button>
+    <button onclick="showSection('feeDetails')">Fee Details</button>
     <button onclick="showSection('reports')">Reports</button>
   </nav>
 
@@ -56,64 +41,162 @@
       <ul id="shiftsList"></ul>
     </section>
 
-    <!-- Members Section -->
-   <section id="members" class="card section hidden">
-  <h2> Tap on seat number to add new member </h2>
-  <div id="seatContainer" class="seats-grid"></div>
+    <!-- ================= Members Section ================= -->
+    <section id="members" class="card section hidden">
+      <h2>Tap on seat number to add new member</h2>
+      <div id="seatContainer" class="seats-grid"></div>
 
-  <!-- Add Member Form -->
-  <div id="addMemberForm" class="hidden">
-    <h3>Add Member</h3>
-    <form id="memberForm">
-      <label>Member Name:</label>
-      <input type="text" id="memberName" required />
+      <!-- ================= Add Member Modal ================= -->
+      <div id="addMemberModal" class="modal hidden">
+        <div class="modal-content">
+          <h3>Add Member</h3>
+          <form id="memberForm">
+            <label>Member Name:</label>
+            <input type="text" id="memberName" required />
 
-      <label>Mobile No.:</label>
-      <input type="tel" id="memberMobile" required />
+            <label>Mobile No.:</label>
+            <input type="tel" id="memberMobile" required />
 
-      <label>Aadhaar No.:</label>
-      <input type="text" id="memberAadhaar" required />
+            <label>Aadhaar No.:</label>
+            <input type="text" id="memberAadhaar" required />
 
-      <label>Address:</label>
-      <textarea id="memberAddress" required></textarea>
+            <label>Address:</label>
+            <textarea id="memberAddress" required></textarea>
 
-      <label>Shift:</label>
-      <select id="memberShift">
-        <option value="Full Day">Full Day</option>
-        <option value="Half Day">Half Day</option>
-      </select>
+            <label>Shift:</label>
+            <select id="memberShift">
+              <option value="Full Day">Full Day</option>
+              <option value="Half Day">Half Day</option>
+            </select>
 
-      <label>Joining Date:</label>
-      <input type="date" id="joiningDate" required />
+            <label>Joining Date:</label>
+            <input type="date" id="joiningDate" required />
 
-      <label>Exit Date:</label>
-      <input type="date" id="exitDate" />
+            <label>Exit Date:</label>
+            <input type="date" id="exitDate" />
 
-      <label>Fee Payment Method:</label>
-      <select id="feeMethod">
-        <option value="Cash">Cash</option>
-        <option value="UPI">UPI</option>
-        <option value="Card">Card</option>
-      </select>
+            <label>Total Fee (₹):</label>
+            <input type="number" id="feeAmount" min="0" required />
 
-      <label>Aadhaar Photo:</label>
-      <input type="file" id="aadhaarPhoto" accept="image/*" />
+            <label>Fee Payment Method:</label>
+            <select id="feeMethod">
+              <option value="Cash">Cash</option>
+              <option value="UPI">UPI</option>
+              <option value="Card">Card</option>
+            </select>
 
-      <label>Profile Picture:</label>
-      <video id="profileCamera" width="200" height="150" autoplay></video>
-      <button type="button" onclick="captureProfile()">Capture Photo</button>
-      <canvas id="profileCanvas" width="200" height="150" class="hidden"></canvas>
+            <label>Aadhaar Photo:</label>
+            <input type="file" id="aadhaarPhoto" accept="image/*" />
 
-      <div style="margin-top:10px;">
-        <button type="button" onclick="saveMember()">Save</button>
-        <button type="button" onclick="cancelAddMember()">Cancel</button>
+            <label>Profile Picture:</label>
+            <video id="profileCamera" width="200" height="150" autoplay></video>
+            <button type="button" onclick="captureProfile()">Capture Photo</button>
+            <canvas id="profileCanvas" width="200" height="150" class="hidden"></canvas>
+
+            <div style="margin-top:10px;">
+              <button type="button" onclick="saveMember()">Save</button>
+              <button type="button" onclick="closeAddMemberModal()">Cancel</button>
+            </div>
+          </form>
+        </div>
       </div>
-    </form>
-  </div>
-</section>
 
+      <!-- ================= Member Details Modal (View first, then Edit) ================= -->
+      <div id="memberDetailsModal" class="modal hidden">
+        <div class="modal-content">
+          <h3>Member Details</h3>
+
+          <!-- Readonly View -->
+          <div id="memberDetailsView">
+            <div class="view-grid">
+              <div class="view-row"><span>Seat No:</span><strong id="viewSeatNo"></strong></div>
+              <div class="view-row"><span>Name:</span><strong id="viewName"></strong></div>
+              <div class="view-row"><span>Mobile:</span><strong id="viewMobile"></strong></div>
+              <div class="view-row"><span>Aadhaar:</span><strong id="viewAadhaar"></strong></div>
+              <div class="view-row"><span>Address:</span><strong id="viewAddress"></strong></div>
+              <div class="view-row"><span>Shift:</span><strong id="viewShift"></strong></div>
+              <div class="view-row"><span>Joining:</span><strong id="viewJoining"></strong></div>
+              <div class="view-row"><span>Exit:</span><strong id="viewExit"></strong></div>
+              <div class="view-row"><span>Fee (₹):</span><strong id="viewFee"></strong></div>
+              <div class="view-row"><span>Method:</span><strong id="viewMethod"></strong></div>
+              <div class="view-row"><span>Status:</span><strong id="viewStatus"></strong></div>
+              <div class="view-row">
+                <span>Profile:</span>
+                <img id="viewProfileImg" alt="Profile" />
+              </div>
+              <div class="view-row">
+                <span>Aadhaar Photo:</span>
+                <img id="viewAadhaarImg" alt="Aadhaar" />
+              </div>
+            </div>
+
+            <div class="view-actions">
+              <button type="button" id="editToggleBtn" onclick="enableEditMode()">Edit</button>
+              <button type="button" onclick="closeMemberModal()">Close</button>
+            </div>
+          </div>
+
+          <!-- Edit Form (hidden initially) -->
+          <form id="editMemberForm" class="hidden">
+            <label>Member Name:</label>
+            <input type="text" id="editMemberName" required />
+
+            <label>Mobile No.:</label>
+            <input type="tel" id="editMemberMobile" required />
+
+            <label>Aadhaar No.:</label>
+            <input type="text" id="editMemberAadhaar" required />
+
+            <label>Address:</label>
+            <textarea id="editMemberAddress" required></textarea>
+
+            <label>Shift:</label>
+            <select id="editMemberShift">
+              <option value="Full Day">Full Day</option>
+              <option value="Half Day">Half Day</option>
+            </select>
+
+            <label>Joining Date:</label>
+            <input type="date" id="editJoiningDate" required />
+
+            <label>Exit Date:</label>
+            <input type="date" id="editExitDate" />
+
+            <label>Total Fee (₹):</label>
+            <input type="number" id="editFeeAmount" min="0" required />
+
+            <label>Fee Payment Method:</label>
+            <select id="editFeeMethod">
+              <option value="Cash">Cash</option>
+              <option value="UPI">UPI</option>
+              <option value="Card">Card</option>
+            </select>
+
+            <div class="view-actions">
+              <button type="button" onclick="updateMember()">Update</button>
+              <button type="button" onclick="cancelEdit()">Cancel</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= Fee Section ================= -->
+    <section id="feeDetails" class="card section hidden">
+      <h2>Fee Details</h2>
+      <div class="fee-buttons">
+        <button onclick="showFeeClassification('status')">Fee Status</button>
+        <button onclick="showFeeClassification('tomorrow')">Ending Tomorrow</button>
+        <button onclick="showFeeClassification('5days')">Ending in 5 Days</button>
+        <button onclick="showFeeClassification('remainder')">Fee Reminder</button>
+      </div>
+      <div id="feeDisplayContainer"></div>
+      <div style="margin-top:20px;">
+        <button onclick="sendReminder('all')" id="sendAllReminderBtn">Send Reminder to All</button>
+      </div>
+    </section>
   </main>
 
-  <script src="./dashboard.js"></script>
+  <script src="dashboard.js"></script>
 </body>
 </html>
