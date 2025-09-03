@@ -5,7 +5,7 @@ window.onload = function () {
 
   if (!currentUserId) {
     alert("Please login first!");
-    window.location.href = "index.html";
+    window.location.href = "./index.html";
     return;
   }
 
@@ -48,7 +48,7 @@ window.onload = function () {
 // ================== Logout ==================
 document.getElementById("logoutBtn").addEventListener("click", () => {
   localStorage.removeItem("currentUser");
-  window.location.href = "../index.html";
+  window.location.href = "./index.html";
 });
 
 // ================== Clock ==================
@@ -77,9 +77,11 @@ function renderSeats() {
   const seatContainer = document.getElementById("seatContainer");
   if (!seatContainer) return;
   seatContainer.innerHTML = "";
+
+  let totalSeats = parseInt(localStorage.getItem("totalSeats")) || 50; // default 50
   let seatsData = JSON.parse(localStorage.getItem(getSeatsKey())) || {};
 
-  for (let i = 1; i <= 50; i++) {
+  for (let i = 1; i <= totalSeats; i++) {
     let seatDiv = document.createElement("div");
     seatDiv.classList.add("seat");
 
@@ -95,7 +97,63 @@ function renderSeats() {
 
     seatContainer.appendChild(seatDiv);
   }
+
+  // ================== Add "Add Seats" button ==================
+  let addBtn = document.createElement("button");
+  addBtn.textContent = "+ Add More Seats";
+  addBtn.classList.add("add-seat-btn");
+  addBtn.onclick = addSeats;
+  seatContainer.appendChild(addBtn);
+
+  // ================== Add "Remove Seats" button ==================
+  let removeBtn = document.createElement("button");
+  removeBtn.textContent = "− Remove Seats";
+  removeBtn.classList.add("remove-seat-btn");
+  removeBtn.onclick = removeSeats;
+  seatContainer.appendChild(removeBtn);
 }
+
+// ================== Add Seats ==================
+function addSeats() {
+  let extra = prompt("How many seats do you want to add?");
+  if (!extra) return;
+  extra = parseInt(extra);
+  if (isNaN(extra) || extra <= 0) {
+    alert("Please enter a valid number!");
+    return;
+  }
+
+  let totalSeats = parseInt(localStorage.getItem("totalSeats")) || 50;
+  totalSeats += extra;
+  localStorage.setItem("totalSeats", totalSeats);
+  renderSeats();
+  alert(extra + " seats added successfully!");
+}
+
+// ================== Remove Seats ==================
+function removeSeats() {
+  let removeCount = prompt("How many seats do you want to remove?");
+  if (!removeCount) return;
+  removeCount = parseInt(removeCount);
+
+  if (isNaN(removeCount) || removeCount <= 0) {
+    alert("Please enter a valid number!");
+    return;
+  }
+
+  let totalSeats = parseInt(localStorage.getItem("totalSeats")) || 50;
+
+  if (totalSeats - removeCount < 50) {
+    alert("You must keep at least 50 seats!");
+    return;
+  }
+
+  totalSeats -= removeCount;
+  localStorage.setItem("totalSeats", totalSeats);
+  renderSeats();
+  alert(removeCount + " seats removed successfully!");
+}
+
 
 // ================== Open Add Member Form (Modal + Blur) ==================
 function openAddMemberForm(seatNo) {
@@ -293,6 +351,46 @@ function updateMember() {
   document.getElementById("editMemberForm").classList.add("hidden");
   document.getElementById("memberDetailsView").classList.remove("hidden");
   editMode = false;
+}
+function deleteMember() {
+  if (!editingSeatNo) return;
+
+  if (!confirm("Are you sure you want to delete this member?")) return;
+
+  let seatsData = JSON.parse(localStorage.getItem(getSeatsKey())) || {};
+
+  delete seatsData[editingSeatNo]; // member remove
+  localStorage.setItem(getSeatsKey(), JSON.stringify(seatsData));
+
+  renderSeats();
+  closeMemberModal();
+
+  alert("Member deleted successfully! Seat is now vacant.");
+}
+function changeSeat() {
+  if (!editingSeatNo) return;
+
+  let newSeat = prompt("Enter new seat number:");
+  if (!newSeat) return;
+
+  newSeat = parseInt(newSeat);
+  let seatsData = JSON.parse(localStorage.getItem(getSeatsKey())) || {};
+
+  if (seatsData[newSeat]) {
+    alert("This seat is already occupied!");
+    return;
+  }
+
+  // Move data
+  seatsData[newSeat] = seatsData[editingSeatNo];
+  delete seatsData[editingSeatNo];
+
+  localStorage.setItem(getSeatsKey(), JSON.stringify(seatsData));
+
+  renderSeats();
+  closeMemberModal();
+
+  alert(`Seat changed from ${editingSeatNo} to ${newSeat}`);
 }
 
 // ================== Section Switching & Fee Details ==================

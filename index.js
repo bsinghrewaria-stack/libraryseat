@@ -1,6 +1,7 @@
-let generatedOTP = "1234"; // Demo OTP
+// ====================== Demo OTP ======================
+let generatedOTP = "1234"; // Use this OTP for testing
 
-// ========= UI Functions =========
+// ====================== UI Functions ======================
 function showRegisterForm() {
   document.getElementById("loginSection").style.display = "none";
   document.getElementById("registerSection").style.display = "block";
@@ -13,14 +14,14 @@ function backToLogin() {
   document.getElementById("newPasswordSection").style.display = "none";
 }
 
-// ========= Country Code =========
+// ====================== Country Code ======================
 function updateCountryCode() {
   let nation = document.getElementById("nation").value;
   document.getElementById("countryCode").value = nation;
 }
 updateCountryCode(); // default call
 
-// ========= Mobile OTP =========
+// ====================== Mobile OTP ======================
 function sendMobileOTP() {
   alert("OTP sent to mobile (Use 1234 for demo)");
   document.getElementById("mobileOTP").style.display = "block";
@@ -36,7 +37,7 @@ function verifyMobileOTP() {
   }
 }
 
-// ========= Email OTP =========
+// ====================== Email OTP ======================
 function sendEmailOTP() {
   alert("OTP sent to Email (Use 1234 for demo)");
   document.getElementById("emailOTP").style.display = "block";
@@ -52,7 +53,7 @@ function verifyEmailOTP() {
   }
 }
 
-// ========= Shifts =========
+// ====================== Shifts ======================
 function showShiftInputs() {
   let shiftCount = parseInt(document.getElementById("shifts").value);
   let container = document.getElementById("shiftInputs");
@@ -69,7 +70,7 @@ function showShiftInputs() {
   }
 }
 
-// ========= Register Organisation =========
+// ====================== Register Organisation ======================
 function registerOrganisation() {
   let orgName = document.getElementById("orgName").value.trim();
   let adminName = document.getElementById("adminName").value.trim();
@@ -92,7 +93,6 @@ function registerOrganisation() {
     alert("Please verify Email before registering ❌");
     return;
   }
-
   if (!orgName || !adminName || !email || !regPassword) {
     alert("Please fill all required fields ❌");
     return;
@@ -124,7 +124,6 @@ function registerOrganisation() {
   };
 
   let users = JSON.parse(localStorage.getItem("users")) || [];
-
   if (users.some(u => u.userId === userId)) {
     alert("This Email is already registered ❌");
     return;
@@ -144,7 +143,7 @@ function registerOrganisation() {
   `;
 }
 
-// ========= Login =========
+// ====================== Login ======================
 function login() {
   let id = document.getElementById("loginId").value.trim();
   let pass = document.getElementById("loginPass").value.trim();
@@ -160,13 +159,13 @@ function login() {
   }
 }
 
-// ========= Forgot Password =========
+// ====================== Forgot Password ======================
 function forgotPassword() {
   document.getElementById("forgotPassSection").style.display = "block";
   document.getElementById("loginSection").style.display = "none";
 }
 function sendForgotOTP() {
-  alert("OTP Sent to Mobile (Use 1234)");
+  alert("OTP Sent (Use 1234)");
 }
 function resetPassword() {
   let otp = document.getElementById("forgotOTP").value;
@@ -179,7 +178,7 @@ function resetPassword() {
   }
 }
 
-// ========= Create New Password =========
+// ====================== Create New Password ======================
 function createNewPassword() {
   let newPass = document.getElementById("newPass").value;
   if (newPass.trim() === "") {
