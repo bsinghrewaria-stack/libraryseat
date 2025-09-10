@@ -5,7 +5,7 @@ window.onload = function () {
 
   if (!currentUserId) {
     alert("Please login first!");
-    window.location.href = "./index.html";
+    window.location.href = "../index.html";
     return;
   }
 
@@ -13,7 +13,7 @@ window.onload = function () {
 
   if (!orgData) {
     alert("Organisation not found!");
-    window.location.href = "index.html";
+    window.location.href = "../index.html";
     return;
   }
 
@@ -46,10 +46,15 @@ window.onload = function () {
 };
 
 // ================== Logout ==================
-document.getElementById("logoutBtn").addEventListener("click", () => {
-  localStorage.removeItem("currentUser");
-  window.location.href = "./index.html";
+// ================== Logout Functionality ==================
+document.getElementById("logoutBtn").addEventListener("click", function () {
+  if (confirm("Are you sure you want to logout?")) {
+    localStorage.removeItem("loggedInUser");
+    window.location.href = "../index.html";
+
+  }
 });
+
 
 // ================== Clock ==================
 function updateClock() {
@@ -177,12 +182,34 @@ function openAddMemberForm(seatNo) {
 function captureProfile() {
   const video = document.getElementById("profileCamera");
   const canvas = document.getElementById("profileCanvas");
-  canvas.getContext("2d").drawImage(video, 0, 0, canvas.width, canvas.height);
-  profileDataURL = canvas.toDataURL("image/png");
-  canvas.classList.remove("hidden");
-  alert("Profile photo captured!");
-}
+  if (!video || !canvas) return;
 
+  try {
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    profileDataURL = canvas.toDataURL("image/png");
+    canvas.classList.remove("hidden");
+    showToast("Profile photo captured!");
+  } catch (e) {
+    console.error("Capture error:", e);
+    alert("Unable to capture photo. Try allowing camera permission or upload a profile picture.");
+  }
+}
+// ---------- Add form balance calculation & listeners ----------
+function updateAddFormBalance() {
+  const totalFeeEl = document.getElementById("feeAmount");
+  const discountEl = document.getElementById("feeDiscount");
+  const paidEl = document.getElementById("paidAmount");
+  const balEl = document.getElementById("balanceAmount");
+
+  const total = parseFloat(totalFeeEl?.value || 0);
+  const discount = parseFloat(discountEl?.value || 0);
+  const paid = parseFloat(paidEl?.value || 0);
+
+  const net = Math.max(0, total - (isNaN(discount) ? 0 : discount));
+  const balance = Math.max(0, net - (isNaN(paid) ? 0 : paid));
+  if (balEl) balEl.value = balance;
+}
 // ================== Save Member ==================
 function saveMember() {
   const name = document.getElementById("memberName").value.trim();
@@ -194,11 +221,6 @@ function saveMember() {
   const exit = document.getElementById("exitDate").value;
   const feeAmount = document.getElementById("feeAmount").value.trim();
   const feeMethod = document.getElementById("feeMethod").value;
-
-  if (!feeAmount) {
-    alert("Please enter Total Fee (₹)");
-    return;
-  }
 
   const aadhaarPhotoFile = document.getElementById("aadhaarPhoto").files[0];
   let seatsData = JSON.parse(localStorage.getItem(getSeatsKey())) || {};
@@ -404,99 +426,6 @@ function showSection(id) {
 
   if (id === "feeDetails") {
     showFeeClassification(currentFeeClassification);
-  }
-}
-
-// ================== Fee Details Logic with Auto Fee Reset ==================
-function showFeeClassification(type) {
-  currentFeeClassification = type;
-  const container = document.getElementById('feeDisplayContainer');
-  if (!container) return;
-  container.innerHTML = '';
-  const seatsData = JSON.parse(localStorage.getItem(getSeatsKey())) || {};
-  const today = new Date();
-
-  function formatDate(dateStr) {
-    if (!dateStr) return 'N/A';
-    const d = new Date(dateStr);
-    const day = String(d.getDate()).padStart(2, '0');
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const year = d.getFullYear();
-    return `${day}-${month}-${year}`;
-  }
-
-  function addMonths(date, months) {
-    let d = new Date(date);
-    d.setMonth(d.getMonth() + months);
-    return d;
-  }
-
-  Object.entries(seatsData).forEach(([seatNo, member]) => {
-    let show = false;
-    let highlight = false;
-
-    if (!member.joining) return;
-    const joinDate = new Date(member.joining);
-    let nextFeeDate = addMonths(joinDate, 1);
-
-    if (member.feePaid && today >= nextFeeDate) {
-      member.feePaid = false; 
-      seatsData[seatNo] = member;
-      localStorage.setItem(getSeatsKey(), JSON.stringify(seatsData));
-    }
-
-    if (type === 'status') show = true;
-    if (type === 'tomorrow') {
-      const diff = Math.ceil((nextFeeDate - today) / (1000 * 60 * 60 * 24));
-      if (diff === 1) { show = true; highlight = true; }
-    }
-    if (type === '5days') {
-      const diff = Math.ceil((nextFeeDate - today) / (1000 * 60 * 60 * 24));
-      if (diff > 0 && diff <= 5) show = true;
-    }
-    if (type === 'remainder' && !member.feePaid) show = true;
-
-    if (show) {
-      const div = document.createElement('div');
-      div.classList.add('fee-seat-card');
-      if (highlight) div.classList.add('highlight');
-      div.classList.add(member.feePaid ? 'paid' : 'pending');
-
-      div.innerHTML = `<strong>Seat ${seatNo}</strong><br>
-        ${member.name}<br>
-        Fee: ₹${member.feeAmount || "N/A"} (${member.feeMethod || "N/A"})<br>
-        Status: ${member.feePaid ? 'Paid' : 'Pending'}<br>
-        Joining: ${formatDate(member.joining)}<br>
-        Next Fee Due: ${formatDate(nextFeeDate)}`;
-
-      if (type === 'remainder' || highlight) {
-        const btn = document.createElement('button');
-        btn.textContent = 'Send Reminder';
-        btn.classList.add('reminder-btn');
-        btn.onclick = () => sendReminder('individual', seatNo);
-        div.appendChild(btn);
-      }
-
-      container.appendChild(div);
-    }
-  });
-}
-
-// ================== Send Reminder ==================
-function sendReminder(type, seatNo = null) {
-  const seatsData = JSON.parse(localStorage.getItem(getSeatsKey())) || {};
-
-  if (type === 'all') {
-    Object.entries(seatsData).forEach(([seat, member]) => {
-      if (!member.feePaid) {
-        alert(`Reminder Sent to ${member.name} (Seat ${seat})\nFee Pending: ₹${member.feeAmount || "N/A"}`);
-      }
-    });
-  } else if (type === 'individual' && seatNo) {
-    const member = seatsData[seatNo];
-    if (member) {
-      alert(`Reminder Sent to ${member.name} (Seat ${seatNo})\nFee Pending: ₹${member.feeAmount || "N/A"}`);
-    }
   }
 }
 

@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Dashboard - Data Record</title>
-  <link rel="stylesheet" href="dashboard.css">
+  <link rel="stylesheet" href="../dashboard/dashboard.css">
 </head>
 <body>
   <header class="site-header">
@@ -23,7 +23,7 @@
     <button onclick="showSection('orgDetails')">Organisation Details</button>
     <button onclick="showSection('Notifications')">Add Notifications /Information</button>
     <button onclick="showSection('members')">Members</button>
-    <button onclick="showSection('feeDetails')">Fee Details</button>
+    <button onclick="showSection(feedeatils)">Fee Details</button>
     <button onclick="showSection('reports')">Reports</button>
   </nav>
 
@@ -43,7 +43,7 @@
 
     <!-- ================= Members Section ================= -->
     <section id="members" class="card section hidden">
-      <h2>Tap on seat number to add new member</h2>
+      <h2>Please,Select seat number to add new member.</h2>
       <div id="seatContainer" class="seats-grid"></div>
 
       <!-- ================= Add Member Modal ================= -->
@@ -260,26 +260,8 @@
         <button type="button" onclick="cancelEdit()">Cancel</button>
       </div>
     </form>
-  </div>
-</div>
-
-
-    <!-- ================= Fee Section ================= -->
-    <section id="feeDetails" class="card section hidden">
-      <h2>Fee Details</h2>
-      <div class="fee-buttons">
-        <button onclick="showFeeClassification('status')">Fee Status</button>
-        <button onclick="showFeeClassification('tomorrow')">Ending Tomorrow</button>
-        <button onclick="showFeeClassification('5days')">Ending in 5 Days</button>
-        <button onclick="showFeeClassification('remainder')">Fee Reminder</button>
-      </div>
-      <div id="feeDisplayContainer"></div>
-      <div style="margin-top:20px;">
-        <button onclick="sendReminder('all')" id="sendAllReminderBtn">Send Reminder to All</button>
-      </div>
-    </section>
-  </main>
-
-  <script src="dashboard.js"></script>
+    
+ </main>
+  <script src="../dashboard/dashboard.js"></script>
 </body>
 </html>
